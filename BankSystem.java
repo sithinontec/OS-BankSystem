@@ -1,8 +1,9 @@
 import java.util.concurrent.*;
 import java.util.concurrent.locks.ReentrantLock;
 
-// 1. Abstract Class with Concurrency Control & Deadlock Prevention
-abstract class BankAccount {
+// 1. Concrete Class with Concurrency Control & Deadlock Prevention
+// (Removed the "abstract" keyword so we can use this directly)
+class BankAccount {
     protected String accountId;
     protected double balance;
     protected final ReentrantLock lock;
@@ -77,14 +78,7 @@ abstract class BankAccount {
     }
 }
 
-// 2. Concrete Implementation
-class SavingsAccount extends BankAccount {
-    public SavingsAccount(String accountId, double initialBalance) {
-        super(accountId, initialBalance);
-    }
-}
-
-// 3. PRIORITY TASK WRAPPER
+// 2. PRIORITY TASK WRAPPER
 class PriorityTask implements Runnable, Comparable<PriorityTask> {
     private final int priority;
     private final String taskName;
@@ -98,7 +92,6 @@ class PriorityTask implements Runnable, Comparable<PriorityTask> {
 
     @Override
     public void run() {
-        // RESTORED: This line explicitly shows which priority is being pulled by which thread!
         System.out.println(Thread.currentThread().getName() + " -> Executing [" + taskName + "] (Priority " + priority + ")");
         action.run(); 
     }
@@ -109,38 +102,37 @@ class PriorityTask implements Runnable, Comparable<PriorityTask> {
     }
 }
 
-// 4. Main System - CONCURRENCY + PRIORITY
+// 3. Main System - CONCURRENCY + PRIORITY
 public class BankSystem {
     public static void main(String[] args) {
-        System.out.println("--- Booting Bank System ---");
         
-        SavingsAccount acc1 = new SavingsAccount("ACC-1001", 4000); // Alice
-        SavingsAccount acc2 = new SavingsAccount("ACC-1002", 2000); // Bob
-        SavingsAccount acc3 = new SavingsAccount("ACC-1003", 5000); // Charlie
+        
+        // Create 3 bank account
+        BankAccount acc1 = new BankAccount("ACC-1001", 4000); 
+        BankAccount acc2 = new BankAccount("ACC-1002", 2000); 
+        BankAccount acc3 = new BankAccount("ACC-1003", 5000); 
 
         PriorityBlockingQueue<PriorityTask> queue = new PriorityBlockingQueue<>();
 
-        // Load up 10 transactions into the queue
-        // Prio 1: Highest (Urgent) | Prio 5: Lowest (Standard)
+        // Load up 10 transactions into the queue 
+        // 1 is highest priority 5 is lowest priority
         queue.put(new PriorityTask(5, "Task A", () -> acc1.deposit(100)));
-        queue.put(new PriorityTask(1, "Task B", () -> acc1.transfer(acc2, 1000))); // Urgent Transfer!
+        queue.put(new PriorityTask(1, "Task B", () -> acc1.transfer(acc2, 1000))); 
         queue.put(new PriorityTask(3, "Task C", () -> acc3.withdraw(500)));
         queue.put(new PriorityTask(2, "Task D", () -> acc2.transfer(acc3, 500)));
         queue.put(new PriorityTask(4, "Task E", () -> acc1.withdraw(200)));
-        queue.put(new PriorityTask(1, "Task F", () -> acc3.transfer(acc1, 2000))); // Urgent Transfer!
+        queue.put(new PriorityTask(1, "Task F", () -> acc3.transfer(acc1, 2000))); 
         queue.put(new PriorityTask(5, "Task G", () -> acc2.deposit(300)));
         queue.put(new PriorityTask(2, "Task H", () -> acc1.deposit(400)));
         queue.put(new PriorityTask(4, "Task I", () -> acc3.deposit(100)));
         queue.put(new PriorityTask(3, "Task J", () -> acc2.withdraw(100)));
 
-        System.out.println("--- Queued 10 transactions. Spinning up 3 Bank Tellers (Threads) ---\n");
+        System.out.println("--- Queued 10 transactions. Doing Transaction with 3 Threads ---\n");
 
-        // Create a pool of 3 threads (Tellers)
-        ExecutorService tellerPool = Executors.newFixedThreadPool(3);
+        ExecutorService tellerPool = Executors.newFixedThreadPool(5);
 
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 5; i++) {
             tellerPool.execute(() -> {
-                // Keep grabbing tasks until the queue is completely empty
                 while (true) {
                     PriorityTask task = queue.poll(); 
                     if (task == null) break; 
@@ -149,7 +141,6 @@ public class BankSystem {
             });
         }
 
-        // Tell the pool we are done assigning work, and wait for them to finish
         tellerPool.shutdown();
         try {
             tellerPool.awaitTermination(5, TimeUnit.SECONDS);
@@ -157,7 +148,6 @@ public class BankSystem {
             System.out.println("Tellers were interrupted!");
         }
 
-        // Print final balances
         System.out.println("\n--- System Shutdown --- Final Balances:");
         System.out.println("ACC-1001: $" + acc1.getBalance()); 
         System.out.println("ACC-1002: $" + acc2.getBalance()); 
