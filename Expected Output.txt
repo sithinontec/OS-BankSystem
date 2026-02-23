@@ -1,0 +1,27 @@
+--- Queued 10 transactions. Doing Transaction with 3 Threads ---
+
+pool-1-thread-3 -> Executing [Transaction D] (Priority 2)
+pool-1-thread-2 -> Executing [Transaction F] (Priority 1)
+pool-1-thread-1 -> Executing [Transaction B] (Priority 1)
+    pool-1-thread-3 [->] TRANSFERRED $500.0 from ACC-1002 to ACC-1003
+pool-1-thread-3 -> Executing [Transaction H] (Priority 2)
+    pool-1-thread-2 [->] TRANSFERRED $2000.0 from ACC-1003 to ACC-1001
+pool-1-thread-2 -> Executing [Transaction J] (Priority 3)
+    pool-1-thread-1 [->] TRANSFERRED $1000.0 from ACC-1001 to ACC-1002
+pool-1-thread-1 -> Executing [Transaction C] (Priority 3)
+    pool-1-thread-1 [-] Withdrew $500.0 from ACC-1003 | Bal: $3000.0
+    pool-1-thread-2 [-] Withdrew $100.0 from ACC-1002 | Bal: $2400.0
+    pool-1-thread-3 [+] Deposited $400.0 to ACC-1001 | Bal: $5400.0
+pool-1-thread-3 -> Executing [Transaction G] (Priority 5)
+pool-1-thread-1 -> Executing [Transaction I] (Priority 4)
+pool-1-thread-2 -> Executing [Transaction E] (Priority 4)
+    pool-1-thread-3 [+] Deposited $300.0 to ACC-1002 | Bal: $2700.0
+    pool-1-thread-1 [+] Deposited $100.0 to ACC-1003 | Bal: $3100.0
+    pool-1-thread-2 [-] Withdrew $200.0 from ACC-1001 | Bal: $5200.0
+pool-1-thread-3 -> Executing [Transaction A] (Priority 5)
+    pool-1-thread-3 [+] Deposited $100.0 to ACC-1001 | Bal: $5300.0
+
+--- System Shutdown --- Final Balances:
+ACC-1001: $5300.0
+ACC-1002: $2700.0
+ACC-1003: $3100.0

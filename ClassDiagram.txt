@@ -1,0 +1,43 @@
+classDiagram
+    %% Interfaces
+    class Runnable {
+        <<interface>>
+        +run() void
+    }
+
+    class Comparable~Transaction~ {
+        <<interface>>
+        +compareTo(other: Transaction) int
+    }
+
+    %% Main Entities
+    class BankAccount {
+        #String accountId
+        #double balance
+        #ReentrantLock lock
+        +BankAccount(accountId: String, initialBalance: double)
+        +getId() String
+        +deposit(amount: double) void
+        +withdraw(amount: double) boolean
+        +transfer(targetAccount: BankAccount, amount: double) boolean
+        +getBalance() double
+    }
+
+    class Transaction {
+        -int priority
+        -String taskName
+        -Runnable action
+        +Transaction(priority: int, taskName: String, action: Runnable)
+        +run() void
+        +compareTo(other: Transaction) int
+    }
+
+    class BankSystem {
+        +main(args: String[]) void$
+    }
+
+    %% Relationships
+    Runnable <|.. Transaction : Implements
+    Comparable~Transaction~ <|.. Transaction : Implements
+    BankSystem ..> BankAccount : Instantiates
+    BankSystem ..> Transaction : Instantiates
