@@ -1,43 +1,42 @@
-classDiagram
-    %% Interfaces
-    class Runnable {
-        <<interface>>
-        +run() void
-    }
+@startuml
+skinparam classAttributeIconSize 0
 
-    class Comparable~Transaction~ {
-        <<interface>>
-        +compareTo(other: Transaction) int
-    }
+interface Runnable {
+    + run(): void
+}
 
-    %% Main Entities
-    class BankAccount {
-        #String accountId
-        #double balance
-        #ReentrantLock lock
-        +BankAccount(accountId: String, initialBalance: double)
-        +getId() String
-        +deposit(amount: double) void
-        +withdraw(amount: double) boolean
-        +transfer(targetAccount: BankAccount, amount: double) boolean
-        +getBalance() double
-    }
+interface "Comparable<Transaction>" as Comparable {
+    + compareTo(other: Transaction): int
+}
 
-    class Transaction {
-        -int priority
-        -String taskName
-        -Runnable action
-        +Transaction(priority: int, taskName: String, action: Runnable)
-        +run() void
-        +compareTo(other: Transaction) int
-    }
+class BankAccount {
+    # accountId: String
+    # balance: double
+    # lock: ReentrantLock
+    + BankAccount(accountId: String, initialBalance: double)
+    + getId(): String
+    + deposit(amount: double): void
+    + withdraw(amount: double): boolean
+    + transfer(targetAccount: BankAccount, amount: double): boolean
+    + getBalance(): double
+}
 
-    class BankSystem {
-        +main(args: String[]) void$
-    }
+class Transaction {
+    - priority: int
+    - taskName: String
+    - action: Runnable
+    + Transaction(priority: int, taskName: String, action: Runnable)
+    + run(): void
+    + compareTo(other: Transaction): int
+}
 
-    %% Relationships
-    Runnable <|.. Transaction : Implements
-    Comparable~Transaction~ <|.. Transaction : Implements
-    BankSystem ..> BankAccount : Instantiates
-    BankSystem ..> Transaction : Instantiates
+class BankSystem {
+    + {static} main(args: String[]): void
+}
+
+Runnable <|.. Transaction : Implements
+Comparable <|.. Transaction : Implements
+BankSystem ..> BankAccount : Instantiates
+BankSystem ..> Transaction : Instantiates
+
+@enduml
